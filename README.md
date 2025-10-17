@@ -44,13 +44,58 @@ PORT=3000
 
 ## Configuración de Prisma
 
-No es necesario ejecutar `npx prisma init`, ya que la configuración del proyecto incluye el directorio `prisma/` y el archivo `schema.prisma`.
+Prisma ya está inicializado en este proyecto.
+Los modelos se definen dentro del archivo principal de esquema:
+`/prisma/schema.prisma`
 
-Después de configurar tu archivo `.env`, ejecuta:
+### Ejemplo: Definición del modelo `Mission`
 
-```bash
-# Crear las tablas definidas en prisma/schema.prisma
-npx prisma migrate dev
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Mission {
+  id                  Int           @id @default(autoincrement())
+  titulo              String
+  descripcion         String?
+  tipo                TipoMision
+  fechaVencimiento    DateTime?
+  duracionMinutos     Int?
+  categoria           String?
+  prioridad           Int
+  dificultad          Int
+  diaria              Boolean
+  recordatorioActivado Boolean      @default(false)
+  fechaCreacion       DateTime      @default(now())
+}
+
+enum TipoMision {
+  DIARIA
+  ESTUDIO
+  PLAZO
+}
+``` 
+
+### Aplicar cambios al esquema
+
+Cuando realices modificaciones en el archivo `schema.prisma`, ejecuta el siguiente comando para actualizar la base de datos:
+
+`npx prisma migrate dev --name update_models`
+
+Este comando:
+- Actualiza la base de datos según los modelos definidos.
+- Regenera automáticamente el cliente de Prisma.
+
+Una vez regenerado, puedes importar el cliente en cualquier servicio desde:
+
+```ts
+import { prisma } from "../../config/prisma";
 ```
 
 Opcionalmente, puedes visualizar la base de datos con Prisma Studio:
