@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Mission {
+  id              Int         @id @default(autoincrement())
+  title           String
+  description     String?
+  type            MissionType
+  dueDate         DateTime?
+  durationMinutes Int?
+  category        String?
+  priority        Int
+  difficulty      Int
+  daily           Boolean
+  reminderEnabled Boolean     @default(false)
+  creationDate    DateTime    @default(now())
+}
+
+enum MissionType {
+  STUDY
+  TASK
+}
