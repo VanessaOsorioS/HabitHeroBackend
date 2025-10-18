@@ -13,3 +13,23 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Mission {
+  id                   Int           @id @default(autoincrement())
+  title                String
+  description          String?
+  type                 MissionType
+  dueDate              DateTime?
+  durationMinutes      Int?
+  category             String?
+  priority             Int
+  difficulty           Int
+  daily                Boolean
+  reminderEnabled      Boolean      @default(false)
+  creationDate         DateTime      @default(now())
+}
+
+enum MissionType {
+  STUDY
+  TASK
+}
