@@ -12,8 +12,8 @@
     "resolveJsonModule": true,                
     "sourceMap": true,                        
     "allowSyntheticDefaultImports": true,     
-    "types": ["node", "express"]
+    "types": ["node", "express", "jest"]
   },
-  "include": ["src"],
+  "include": ["src", "jest"],
   "exclude": ["node_modules", "dist"]
 }
