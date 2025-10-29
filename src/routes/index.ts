@@ -1,9 +1,8 @@
-import express from 'express';
+import { Router } from "express";
+import missionRoutes from "../modules/mission/mission.routes";
 
-const missionRoutes = require('../modules/mission/mission.route');
+const router = Router();
 
-const router = express.Router();
+router.use("/missions", missionRoutes);
 
-router.use('/missions', missionRoutes);
-
-module.exports = router;
+export default router;
