@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as missionService from "./mission.service";
+import * as missionService from "./mission.service.js";
 
 export const createMission = async (req: Request, res: Response) => {
   try {

@@ -1,7 +1,6 @@
-import * as missionService from '../../src/modules/mission/mission.service';
-import { prisma } from '../../src/config/prisma';
+import { jest } from "@jest/globals";
 
-jest.mock('../../src/config/prisma', () => ({
+jest.unstable_mockModule("../../src/config/prisma.ts", () => ({
   prisma: {
     mission: {
       findMany: jest.fn(),
@@ -9,6 +8,9 @@ jest.mock('../../src/config/prisma', () => ({
     },
   },
 }));
+
+const { prisma } = await import("../../src/config/prisma.ts");
+const missionService = await import("../../src/modules/mission/mission.service.ts");
 
 describe('Mission Service', () => {
   describe('getAllMissions', () => {
