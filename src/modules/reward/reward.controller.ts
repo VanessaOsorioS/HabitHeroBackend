@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
-import { getAllRewards as getRewards } from './reward.service';
+import { getAllRewards as getRewards, getRewardsWithMission } from './reward.service';
 import { RewardType } from '../../../generated/prisma';
 
 export const getAllRewards = async (req: Request, res: Response) => {
     try {
-        const reward = await getRewards();
+        const reward = await getRewardsWithMission();
+        if (reward.length === 0) {
+            return res.status(404).json({ message: "No rewards found." });
+        }
         return res.status(200).json(reward);
     } catch (error) {
         return res.status(500).json({ error: 'Internal Server Error' });

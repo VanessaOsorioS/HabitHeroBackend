@@ -27,6 +27,7 @@ model Mission {
   daily                Boolean
   reminderEnabled      Boolean      @default(false)
   creationDate         DateTime      @default(now())
+  status               MissionStatus  @default(PENDING)
   rewards              Reward[]
 }
 
@@ -45,6 +46,11 @@ enum RewardType {
   BADGE
   COLLECTABLE
   TITLE
+}
+
+enum MissionStatus {
+  COMPLETED
+  PENDING
 }
 
 enum MissionType {
