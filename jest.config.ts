@@ -18,4 +18,8 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1", // <-- Mapea imports .js → .ts automáticamente
   },
   verbose: true,
+
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov", "html"],
 };
