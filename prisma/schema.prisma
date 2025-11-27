@@ -27,9 +27,44 @@ model Mission {
   daily                Boolean
   reminderEnabled      Boolean      @default(false)
   creationDate         DateTime      @default(now())
+  statusHistories     MissionStatusHistory[]
+  rewards              Reward[]
+}
+
+model Reward {
+  id           Int         @id @default(autoincrement())
+  rewardType   RewardType
+  value        Int
+  description  String?
+  missionId    Int
+  mission      Mission     @relation(fields: [missionId], references: [id])
+}
+
+model MissionStatusHistory {
+  id        Int          @id @default(autoincrement())
+  mission   Mission      @relation(fields: [missionId], references: [id])
+  missionId Int
+  status    MissionState
+  date      DateTime
+}
+
+enum RewardType {
+  XP
+  COIN
+  BADGE
+  COLLECTABLE
+  TITLE
+}
+
+enum MissionState {
+  COMPLETED
+  PENDING
+  FAILED
+  IN_PROGRESS
 }
 
 enum MissionType {
   STUDY
   TASK
 }
+
