@@ -92,6 +92,32 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AvatarScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  hatId: 'hatId',
+  shirtId: 'shirtId',
+  pantsId: 'pantsId',
+  shoesId: 'shoesId'
+};
+
+exports.Prisma.AuthTokenScalarFieldEnum = {
+  id: 'id',
+  tokenString: 'tokenString',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+};
+
 exports.Prisma.MissionScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -104,7 +130,23 @@ exports.Prisma.MissionScalarFieldEnum = {
   difficulty: 'difficulty',
   daily: 'daily',
   reminderEnabled: 'reminderEnabled',
-  creationDate: 'creationDate'
+  creationDate: 'creationDate',
+  userId: 'userId'
+};
+
+exports.Prisma.RewardScalarFieldEnum = {
+  id: 'id',
+  rewardType: 'rewardType',
+  value: 'value',
+  description: 'description',
+  missionId: 'missionId'
+};
+
+exports.Prisma.MissionStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  status: 'status',
+  date: 'date'
 };
 
 exports.Prisma.SortOrder = {
@@ -121,13 +163,33 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.RewardType = exports.$Enums.RewardType = {
+  XP: 'XP',
+  COIN: 'COIN',
+  BADGE: 'BADGE',
+  COLLECTABLE: 'COLLECTABLE',
+  TITLE: 'TITLE'
+};
+
+exports.MissionState = exports.$Enums.MissionState = {
+  COMPLETED: 'COMPLETED',
+  PENDING: 'PENDING',
+  FAILED: 'FAILED',
+  IN_PROGRESS: 'IN_PROGRESS'
+};
+
 exports.MissionType = exports.$Enums.MissionType = {
   STUDY: 'STUDY',
   TASK: 'TASK'
 };
 
 exports.Prisma.ModelName = {
-  Mission: 'Mission'
+  User: 'User',
+  Avatar: 'Avatar',
+  AuthToken: 'AuthToken',
+  Mission: 'Mission',
+  Reward: 'Reward',
+  MissionStatusHistory: 'MissionStatusHistory'
 };
 /**
  * Create the Client
@@ -140,7 +202,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\stfra\\Desktop\\soft3\\ProyectoFinal\\backend\\HabitHeroBackend\\generated\\prisma",
+      "value": "C:\\Users\\hp\\Desktop\\ProgrammingAndDevelopment\\Projects\\VSC Projects\\sw3\\HabitHero\\HabitHeroBackend\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -154,7 +216,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\stfra\\Desktop\\soft3\\ProyectoFinal\\backend\\HabitHeroBackend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\hp\\Desktop\\ProgrammingAndDevelopment\\Projects\\VSC Projects\\sw3\\HabitHero\\HabitHeroBackend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -176,13 +238,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Mission {\n  id              Int         @id @default(autoincrement())\n  title           String\n  description     String?\n  type            MissionType\n  dueDate         DateTime?\n  durationMinutes Int?\n  category        String?\n  priority        Int\n  difficulty      Int\n  daily           Boolean\n  reminderEnabled Boolean     @default(false)\n  creationDate    DateTime    @default(now())\n}\n\nenum MissionType {\n  STUDY\n  TASK\n}\n",
-  "inlineSchemaHash": "75f2b37ce375e7919e57d5e621fb5c45689e3879126572c377f12210d3ae706e",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id           Int      @id @default(autoincrement())\n  name         String\n  email        String   @unique\n  passwordHash String\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  missions Mission[]\n  avatar   Avatar?\n  tokens   AuthToken[]\n}\n\nmodel Avatar {\n  id     Int  @id @default(autoincrement())\n  user   User @relation(fields: [userId], references: [id])\n  userId Int  @unique\n\n  hatId   Int?\n  shirtId Int?\n  pantsId Int?\n  shoesId Int?\n}\n\nmodel AuthToken {\n  id          Int      @id @default(autoincrement())\n  tokenString String   @unique\n  user        User     @relation(fields: [userId], references: [id])\n  userId      Int\n  createdAt   DateTime @default(now())\n  expiresAt   DateTime\n\n  @@index([tokenString])\n}\n\nmodel Mission {\n  id              Int         @id @default(autoincrement())\n  title           String\n  description     String?\n  type            MissionType\n  dueDate         DateTime?\n  durationMinutes Int?\n  category        String?\n  priority        Int\n  difficulty      Int\n  daily           Boolean\n  reminderEnabled Boolean     @default(false)\n  creationDate    DateTime    @default(now())\n\n  userId          Int\n  user            User                   @relation(fields: [userId], references: [id])\n  statusHistories MissionStatusHistory[]\n  rewards         Reward[]\n}\n\nmodel Reward {\n  id          Int        @id @default(autoincrement())\n  rewardType  RewardType\n  value       Int\n  description String?\n\n  missionId Int\n  mission   Mission @relation(fields: [missionId], references: [id])\n}\n\nmodel MissionStatusHistory {\n  id        Int          @id @default(autoincrement())\n  mission   Mission      @relation(fields: [missionId], references: [id])\n  missionId Int\n  status    MissionState\n  date      DateTime\n}\n\nenum RewardType {\n  XP\n  COIN\n  BADGE\n  COLLECTABLE\n  TITLE\n}\n\nenum MissionState {\n  COMPLETED\n  PENDING\n  FAILED\n  IN_PROGRESS\n}\n\nenum MissionType {\n  STUDY\n  TASK\n}\n",
+  "inlineSchemaHash": "d3795b49ec4bac390f7f421d4b55fae645833e1d4c83c8c1cd83ecdfaecb33d6",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Mission\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"enum\",\"type\":\"MissionType\"},{\"name\":\"dueDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"durationMinutes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"category\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priority\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"difficulty\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"daily\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"reminderEnabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"creationDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"missions\",\"kind\":\"object\",\"type\":\"Mission\",\"relationName\":\"MissionToUser\"},{\"name\":\"avatar\",\"kind\":\"object\",\"type\":\"Avatar\",\"relationName\":\"AvatarToUser\"},{\"name\":\"tokens\",\"kind\":\"object\",\"type\":\"AuthToken\",\"relationName\":\"AuthTokenToUser\"}],\"dbName\":null},\"Avatar\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AvatarToUser\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"hatId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"shirtId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pantsId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"shoesId\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null},\"AuthToken\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"tokenString\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AuthTokenToUser\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Mission\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"enum\",\"type\":\"MissionType\"},{\"name\":\"dueDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"durationMinutes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"category\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priority\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"difficulty\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"daily\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"reminderEnabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"creationDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"MissionToUser\"},{\"name\":\"statusHistories\",\"kind\":\"object\",\"type\":\"MissionStatusHistory\",\"relationName\":\"MissionToMissionStatusHistory\"},{\"name\":\"rewards\",\"kind\":\"object\",\"type\":\"Reward\",\"relationName\":\"MissionToReward\"}],\"dbName\":null},\"Reward\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rewardType\",\"kind\":\"enum\",\"type\":\"RewardType\"},{\"name\":\"value\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"missionId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"mission\",\"kind\":\"object\",\"type\":\"Mission\",\"relationName\":\"MissionToReward\"}],\"dbName\":null},\"MissionStatusHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"mission\",\"kind\":\"object\",\"type\":\"Mission\",\"relationName\":\"MissionToMissionStatusHistory\"},{\"name\":\"missionId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"MissionState\"},{\"name\":\"date\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
