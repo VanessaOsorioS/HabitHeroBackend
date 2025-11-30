@@ -6,4 +6,4 @@ const {getAllRewards, getCoinAndXpRewards} = require('../reward/reward.controlle
 router.get('/', getAllRewards);
 router.get('/coin-xp', getCoinAndXpRewards);
 
-module.exports = router;
+export default router;

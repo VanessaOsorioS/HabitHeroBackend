@@ -1,10 +1,14 @@
 import { Router } from "express";
 import missionRoutes from "../modules/mission/mission.routes";
 import authRoutes from "../modules/auth/auth.routes";
+import avatarRoutes from "../modules/avatar/avatar.routes";
+import rewardRoutes from "../modules/reward/reward.route";
 
 const router = Router();
 
 router.use("/missions", missionRoutes);
 router.use("/auth", authRoutes);
+router.use("/avatar", avatarRoutes);
+router.use("/rewards", rewardRoutes);
 
 export default router;

@@ -202,7 +202,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\hp\\Desktop\\ProgrammingAndDevelopment\\Projects\\VSC Projects\\sw3\\HabitHero\\HabitHeroBackend\\generated\\prisma",
+      "value": "C:\\Users\\stfra\\Desktop\\soft3\\ProyectoFinal\\backend\\HabitHeroBackend\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -216,7 +216,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\hp\\Desktop\\ProgrammingAndDevelopment\\Projects\\VSC Projects\\sw3\\HabitHero\\HabitHeroBackend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\stfra\\Desktop\\soft3\\ProyectoFinal\\backend\\HabitHeroBackend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
