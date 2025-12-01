@@ -3,8 +3,8 @@ import { getAvatar, updateAvatar, initAvatar } from "./avatar.controller";
 
 const router = express.Router();
 
-router.get("/", getAvatar);
-router.put("/", updateAvatar);
-router.post("/init", initAvatar);
+router.get("/:userId", getAvatar);
+router.put("/:userId", updateAvatar);
+router.post("/init/:userId", initAvatar);
 
 export default router;

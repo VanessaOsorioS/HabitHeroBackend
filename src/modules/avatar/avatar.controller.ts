@@ -3,7 +3,7 @@ import * as avatarService from "./avatar.service";
 
 export const getAvatar = async (req: Request, res: Response) => {
   try {
-    const userId = req.body.userId;
+    const userId = Number(req.params.userId);
 
     const avatar = await avatarService.getAvatarByUser(userId);
 
@@ -18,7 +18,8 @@ export const getAvatar = async (req: Request, res: Response) => {
 
 export const updateAvatar = async (req: Request, res: Response) => {
   try {
-    const { hatId, shirtId, pantsId, shoesId, userId } = req.body;
+    const userId = Number(req.params.userId)
+    const { hatId, shirtId, pantsId, shoesId} = req.body;
 
     const updated = await avatarService.updateAvatar(userId, {
       hatId,
@@ -36,7 +37,7 @@ export const updateAvatar = async (req: Request, res: Response) => {
 
 export const initAvatar = async (req: Request, res: Response) => {
   try {
-    const userId = req.body.userId;
+    const userId = Number(req.params.userId);
 
     const avatar = await avatarService.createAvatar(userId);
     return res.status(201).json({ message: "Avatar created", data: avatar });
