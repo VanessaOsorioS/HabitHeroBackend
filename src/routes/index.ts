@@ -6,9 +6,9 @@ import rewardRoutes from "../modules/reward/reward.route";
 
 const router = Router();
 
-router.use("/missions", missionRoutes);
+router.use("/mission", missionRoutes);
 router.use("/auth", authRoutes);
 router.use("/avatar", avatarRoutes);
-router.use("/rewards", rewardRoutes);
+router.use("/reward", rewardRoutes);
 
 export default router;

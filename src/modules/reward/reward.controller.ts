@@ -4,7 +4,8 @@ import { RewardType } from '../../../generated/prisma';
 
 export const getAllRewards = async (req: Request, res: Response) => {
     try {
-        const reward = await getRewardsWithMission();
+        const userId = (req as any).userId;
+        const reward = await getRewardsWithMission(userId);
         if (reward.length === 0) {
             return res.status(404).json({ message: "No rewards found." });
         }
@@ -16,7 +17,8 @@ export const getAllRewards = async (req: Request, res: Response) => {
 
 export const getCoinAndXpRewards = async (req: Request, res: Response) => {
     try {
-        const rewards = await getRewards();
+        const userId = (req as any).userId;
+        const rewards = await getRewards(userId);
 
         const coinReward = rewards
             .filter(r => r.rewardType === RewardType.COIN)

@@ -1,13 +1,49 @@
 import { Request, Response } from "express";
 import * as missionService from "./mission.service";
-
 import { MissionState, RewardType } from "../../../generated/prisma";
 import { calculateRewards } from "./mission.helper";
 import { createReward } from "../reward/reward.service";
 
 export const createMission = async (req: Request, res: Response) => {
+  const {
+    title,
+    description,
+    type, dueDate,
+    durationMinutes,
+    category,
+    priority,
+    difficulty,
+    daily,
+    reminderEnabled,
+    userId } = req.body;
+
+    const userIdFromToken = (req as any).userId;
+
   try {
-    const mission = await missionService.createMission(req.body);
+    const mission = await missionService.createMission({
+      title,
+      description,
+      type,
+      dueDate,
+      durationMinutes,
+      category,
+      priority,
+      difficulty,
+      daily,
+      reminderEnabled,
+      userId: userIdFromToken
+    });
+
+    if (!mission) {
+      return res.status(500).json({ message: "Error creating mission." });
+    }
+
+    await missionService.createMissionStatusHistory({
+      missionId: mission.id,
+      status: MissionState.PENDING,
+      date: new Date()
+    });
+
     return res.status(201).json({
       message: "Mission created successfully",
       data: mission,
@@ -20,7 +56,8 @@ export const createMission = async (req: Request, res: Response) => {
 
 export const getAllMissions = async (_req: Request, res: Response) => {
   try {
-    const missions = await missionService.getAllMissions();
+    const userId = (_req as any).userId;
+    const missions = await missionService.getAllMissions(userId);
     return res.status(200).json({ data: missions });
   } catch (error) {
     console.error("Error fetching missions:", error);
@@ -30,7 +67,8 @@ export const getAllMissions = async (_req: Request, res: Response) => {
 
 export const getPendingMissions = async (_req: Request, res: Response) => {
   try {
-    const missions = await missionService.getAllMissions();
+    const userId = (_req as any).userId;
+    const missions = await missionService.getAllMissions(userId);
 
     const pending = missions.filter(
       mission =>
@@ -38,11 +76,9 @@ export const getPendingMissions = async (_req: Request, res: Response) => {
         mission.statusHistories[0]?.status === MissionState.IN_PROGRESS
     );
 
-    if (pending.length === 0) {
-      return res.status(404).json({ message: "No pending missions found." });
-    }
+    return res.status(200).json({ data: pending, message: pending.length === 0
+          ? "No pending missions found.": undefined, });
 
-    return res.status(200).json({ data: pending });
   } catch (error) {
     console.error("Error fetching pending missions:", error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -50,9 +86,10 @@ export const getPendingMissions = async (_req: Request, res: Response) => {
 };
 
 export const completeMission = async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
   const missionId = Number.parseInt(req.params.id);
 
-  const mission = await missionService.getMissionById(missionId);
+  const mission = await missionService.getMissionById(missionId, userId);
 
   if (!mission) {
     return res.status(404).json({ message: "Mission not found." });
@@ -95,7 +132,7 @@ export const completeMission = async (req: Request, res: Response) => {
   }
 
   return res.status(200).json({
-    xp,
+    xp: xp,
     coins: coin,
   });
 };
