@@ -12,18 +12,20 @@ jest.mock('../../src/config/prisma', () => ({
 
 describe('Mission Service', () => {
   describe('getAllMissions', () => {
-    it('should return all missions', async () => {
+    it('should return all missions for a user', async () => {
+      const mockUserId = 1; 
       const mockMissions = [
-        { id: 1, name: 'Mission 1' },
-        { id: 2, name: 'Mission 2' },
+        { id: 1, title: 'Mission 1', userId: mockUserId },
+        { id: 2, title: 'Mission 2', userId: mockUserId },
       ];
+      
       (prisma.mission.findMany as jest.Mock).mockResolvedValue(mockMissions);
 
-      const missions = await missionService.getAllMissions();
+      const missions = await missionService.getAllMissions(mockUserId);
 
-      expect(prisma.mission.findMany).toHaveBeenCalledTimes(1);
-      expect(Array.isArray(missions)).toBe(true);
-      expect(missions).toHaveLength(2);
+      expect(prisma.mission.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { userId: mockUserId }
+      }));
       expect(missions).toEqual(mockMissions);
     });
   });
@@ -37,11 +39,9 @@ describe('Mission Service', () => {
 
       const createdMission = await missionService.createMission(mockMissionData);
 
-      // Verifica que Prisma fue llamado con los datos correctos
       expect(prisma.mission.create).toHaveBeenCalledTimes(1);
       expect(prisma.mission.create).toHaveBeenCalledWith({ data: mockMissionData });
 
-      // Verifica que el resultado es el esperado
       expect(createdMission).toEqual(mockCreatedMission);
     });
 

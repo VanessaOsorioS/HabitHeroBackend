@@ -3,6 +3,23 @@ import { findToken, findUserById } from "./middleware.service";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // Rutas públicas que NO deben pedir token
+        const publicRoutes = [
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh"
+        ];
+
+        // Si la ruta está en las públicas → pasa directo
+        if (publicRoutes.includes(req.path)) {
+            return next();
+        }
+
+        // Si la ruta inicia con /api/auth → también es pública
+        if (req.path.startsWith("/api/auth")) {
+            return next();
+        }
+
         const header = req.headers.authorization;
 
         if (!header) {

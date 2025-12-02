@@ -3,14 +3,18 @@ import crypto from "node:crypto";
 import { prisma } from "../../config/prisma";
 
 export class AuthService {
-  async validateUser(email: string, password: string) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    async validateUser(email: string, password: string) {
+    console.log("Email recibido:", email);
+    console.log("Password recibido:", password);
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    console.log("Usuario encontrado:", user);
 
     if (!user) return null;
 
     const isValid = await argon2.verify(user.passwordHash, password);
+    console.log("¿Password coincide?:", isValid);
+
     if (!isValid) return null;
 
     return user;

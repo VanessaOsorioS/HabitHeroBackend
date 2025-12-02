@@ -4,7 +4,12 @@ import { getAvatar, updateAvatar, initAvatar } from "../../src/modules/avatar/av
 
 jest.mock("../../src/modules/avatar/avatar.service");
 
-const mockReq = (body: any) => ({ body } as Request);
+const mockReq = (body: any = {}, userId: number = 1) => ({
+  body,
+  user: { userId },
+  params: { id: "1" }
+} as unknown as Request);
+
 const mockRes = () => {
   const res = {} as Response;
   res.status = jest.fn().mockReturnValue(res);
@@ -18,7 +23,7 @@ describe("Avatar Controller", () => {
     it("should return 404 if avatar not found", async () => {
       (avatarService.getAvatarByUser as jest.Mock).mockResolvedValue(null);
 
-      const req = mockReq({ userId: 5 });
+      const req = mockReq({}, 5);
       const res = mockRes();
 
       await getAvatar(req, res);
@@ -32,7 +37,7 @@ describe("Avatar Controller", () => {
     it("should update avatar", async () => {
       (avatarService.updateAvatar as jest.Mock).mockResolvedValue({ hatId: 1 });
 
-      const req = mockReq({ userId: 1, hatId: 1 });
+      const req = mockReq({ hatId: 1 }, 1);
       const res = mockRes();
 
       await updateAvatar(req, res);
@@ -48,7 +53,7 @@ describe("Avatar Controller", () => {
         userId: 1,
       });
 
-      const req = mockReq({ userId: 1 });
+      const req = mockReq({}, 1);
       const res = mockRes();
 
       await initAvatar(req, res);

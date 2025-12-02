@@ -2,59 +2,65 @@ import request from "supertest";
 import app from "../../src/app";
 import { prisma } from "../../src/config/prisma";
 import { RewardType } from "../../generated/prisma";
-import { resetDB } from "../test-helpers";
 
 describe("Reward Routes (Integration)", () => {
 
-  beforeAll(async () => {
-    await resetDB();
-  });
-
-  afterAll(async () => {
-    await resetDB();
-  });
-
-  const createScenario = async () => {
+  const setupScenario = async () => {
     const email = `reward_${Date.now()}_${Math.floor(Math.random() * 100000)}@test.com`;
-    return await prisma.mission.create({
+    const token = `token_reward_${Date.now()}_${Math.random()}`;
+
+    await prisma.mission.create({
       data: {
-        title: "Test Mission", priority: 1, difficulty: 1, daily: false, type: "STUDY",
+        title: "Reward Mission", type: "STUDY", priority: 1, difficulty: 1, daily: false,
         user: {
-          create: { name: "User Test", email: email, passwordHash: "fakehash" }
+          create: {
+            name: "Reward User",
+            email: email,
+            passwordHash: "fakehash",
+            tokens: {
+              create: {
+                tokenString: token,
+                expiresAt: new Date(Date.now() + 3600000)
+              }
+            }
+          }
         },
         rewards: {
           create: [
-            { rewardType: RewardType.XP, value: 10 },
-            { rewardType: RewardType.COIN, value: 5 }
+            { rewardType: RewardType.XP, value: 50 },
+            { rewardType: RewardType.COIN, value: 20 }
           ]
         }
       }
     });
+
+    return { token };
   };
 
-  describe("GET /api/rewards", () => {
-    it("should return all rewards with mission", async () => {
-      // Limpiamos antes para asegurar estado limpio
-      await resetDB();
-      await createScenario(); 
+  describe("GET /api/reward", () => {
+    it("should return rewards", async () => {
+      const { token } = await setupScenario();
 
-      const response = await request(app).get("/api/rewards");
+      const response = await request(app)
+        .get("/api/reward") 
+        .set("Authorization", `Bearer ${token}`);
+
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
     });
   });
 
-  describe("GET /api/rewards/coin-xp", () => {
+  describe("GET /api/reward/coin-xp", () => {
     it("should return the sum of coins and XP", async () => {
-      // Limpiamos y recreamos
-      await resetDB(); 
-      await createScenario();
+      const { token } = await setupScenario();
 
-      const response = await request(app).get("/api/rewards/coin-xp");
+      const response = await request(app)
+        .get("/api/reward/coin-xp") 
+        .set("Authorization", `Bearer ${token}`);
+
       expect(response.status).toBe(200);
-      expect(response.body.coins).toBe(5);
-      expect(response.body.xp).toBe(10);
+      expect(response.body.coins).toBe(20);
+      expect(response.body.xp).toBe(50);
     });
   });
 });

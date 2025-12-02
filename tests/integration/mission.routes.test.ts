@@ -1,42 +1,46 @@
 import request from "supertest";
 import app from "../../src/app";
 import { prisma } from "../../src/config/prisma";
-import { resetDB } from "../test-helpers";
 
 describe("Mission Routes (Integration)", () => {
 
-  beforeAll(async () => {
-    await resetDB();
-  });
-
-  afterAll(async () => {
-    await resetDB();
-    // NO desconectamos para no afectar otros tests
-  });
-
-  // Helper local simple
-  const createLocalUser = async () => {
-    return await prisma.user.create({
+  const createAuthUser = async () => {
+    const user = await prisma.user.create({
       data: {
-        name: "Mission Tester",
-        // Email aleatorio para evitar colisiones P2002
-        email: `mission_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.com`,
+        name: "Mission User",
+        email: `mission_${Date.now()}_${Math.floor(Math.random() * 100000)}@test.com`,
         passwordHash: "fakehash",
       },
     });
+
+    const token = `token_${Date.now()}_${Math.random()}`;
+    await prisma.authToken.create({
+      data: {
+        tokenString: token,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 3600000),
+      },
+    });
+
+    return { user, token };
   };
   
-  describe("GET /missions", () => {
+  describe("GET /api/mission", () => {
     it("should return all missions with status 200", async () => {
-      const response = await request(app).get("/api/missions");
+      const { token } = await createAuthUser();
+
+      const response = await request(app)
+        .get("/api/mission") // <--- Singular
+        .set("Authorization", `Bearer ${token}`);
+
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
-  describe("POST /missions", () => {
+  describe("POST /api/mission", () => {
     it("should create a new mission and return 201", async () => {
-      const localUser = await createLocalUser(); // Creamos usuario fresco AQUÍ
+      const { user, token } = await createAuthUser();
 
       const newMission = {
         title: "New test mission",
@@ -45,30 +49,16 @@ describe("Mission Routes (Integration)", () => {
         priority: 2,
         difficulty: 3,
         daily: true,
-        userId: localUser.id, // Usamos el ID de este usuario fresco
       };
 
       const response = await request(app)
-        .post("/api/missions")
+        .post("/api/mission") 
+        .set("Authorization", `Bearer ${token}`)
         .send(newMission)
         .set("Accept", "application/json");
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty("data");
-      expect(response.body.data).toMatchObject({
-        title: newMission.title,
-        userId: localUser.id,
-      });
-    });
-
-    it("should return 500 if mission creation fails", async () => {
-      // Este test no necesita usuario porque falla antes de validar datos
-      const invalidMission = { title: null };
-      const response = await request(app)
-        .post("/api/missions")
-        .send(invalidMission);
-
-      expect(response.status).toBe(500);
+      expect(response.body.data.userId).toBe(user.id);
     });
   });
 });

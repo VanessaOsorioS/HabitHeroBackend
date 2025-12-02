@@ -13,16 +13,20 @@ jest.mock("../../src/config/prisma", () => ({
 describe("Reward Service", () => {
   describe("getAllRewards", () => {
     it("should return a list of rewards", async () => {
-      const mockRewards = [
-        { id: 1, rewardType: "XP", value: 10 },
-        { id: 2, rewardType: "COIN", value: 5 }
-      ];
+      const mockUserId = 1;
+      const mockRewards = [{ id: 1, rewardType: "XP", value: 10 }];
 
       (prisma.reward.findMany as jest.Mock).mockResolvedValue(mockRewards);
 
-      const result = await rewardService.getAllRewards();
+      const result = await rewardService.getAllRewards(mockUserId);
 
-      expect(prisma.reward.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.reward.findMany).toHaveBeenCalledWith({
+        where: {
+          mission: {
+            userId: mockUserId,
+          },
+        },
+      });
       expect(result).toEqual(mockRewards);
     });
   });
@@ -36,13 +40,21 @@ describe("Reward Service", () => {
           mission: { id: 99, title: "Mission Test" }
         }
       ];
+      const mockUserId = 1;
 
       (prisma.reward.findMany as jest.Mock).mockResolvedValue(mockRewards);
 
-      const result = await rewardService.getRewardsWithMission();
+      const result = await rewardService.getRewardsWithMission(mockUserId);
 
       expect(prisma.reward.findMany).toHaveBeenCalledWith({
-        include: { mission: true }
+        where: {
+          mission: {
+            userId: mockUserId,
+          },
+        },
+        include: {
+          mission: true,
+        },
       });
 
       expect(result).toEqual(mockRewards);

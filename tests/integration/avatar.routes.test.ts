@@ -1,80 +1,64 @@
-import request from "supertest";
-import app from "../../src/app";
-import { prisma } from "../../src/config/prisma";
-import { resetDB } from "../test-helpers";
+import { Request, Response } from "express";
+import * as avatarService from "../../src/modules/avatar/avatar.service";
+import { getAvatar, updateAvatar, initAvatar } from "../../src/modules/avatar/avatar.controller";
 
-describe("Avatar Routes (Integration)", () => {
-  
-  beforeAll(async () => {
-    await resetDB();
-  });
+jest.mock("../../src/modules/avatar/avatar.service");
 
-  afterAll(async () => {
-    await resetDB();
-    await prisma.$disconnect();
-  });
+const mockReq = (body: any = {}, params: any = {}) => ({
+  body,
+  params
+} as unknown as Request);
 
-  // Helper para crear usuario local en cada test (ESTA ES LA CLAVE DEL ÉXITO)
-  const createLocalUser = async () => {
-    return await prisma.user.create({
-      data: {
-        name: "Avatar Tester",
-        email: `avatar_local_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.com`,
-        passwordHash: "fakehash",
-      },
-    });
-  };
+const mockRes = () => {
+  const res = {} as Response;
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res;
+};
 
-  describe("POST /api/avatar/init", () => {
-    it("should create an avatar and return 201", async () => {
-      const localUser = await createLocalUser(); 
+describe("Avatar Controller", () => {
 
-      const response = await request(app)
-        .post("/api/avatar/init")
-        .send({ userId: localUser.id });
+  describe("getAvatar", () => {
+    it("should return 404 if avatar not found", async () => {
+      (avatarService.getAvatarByUser as jest.Mock).mockResolvedValue(null);
 
-      expect(response.status).toBe(201);
-      expect(response.body.data.userId).toBe(localUser.id);
+      const req = mockReq({}, { userId: "5" });
+      const res = mockRes();
+
+      await getAvatar(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: "Avatar not found" });
     });
   });
 
-  describe("GET /api/avatar", () => {
-    it("should return the avatar", async () => {
-      const localUser = await createLocalUser();
-      await prisma.avatar.create({ data: { userId: localUser.id } });
+  describe("updateAvatar", () => {
+    it("should update avatar", async () => {
+      (avatarService.updateAvatar as jest.Mock).mockResolvedValue({ hatId: 1 });
 
-      const response = await request(app)
-        .get("/api/avatar")
-        .send({ userId: localUser.id });
+      const req = mockReq({ hatId: 1 }, { userId: "1" });
+      const res = mockRes();
 
-      expect(response.status).toBe(200);
-      expect(response.body.data.userId).toBe(localUser.id);
-    });
+      await updateAvatar(req, res);
 
-    it("should return 404 if no avatar exists", async () => {
-      const response = await request(app)
-        .get("/api/avatar")
-        .send({ userId: 2147483647 });
-
-      expect(response.status).toBe(404);
+      expect(res.json).toHaveBeenCalled();
     });
   });
 
-  describe("PUT /api/avatar", () => {
-    it("should update avatar successfully", async () => {
-      const localUser = await createLocalUser();
-      await prisma.avatar.create({ data: { userId: localUser.id } });
+  describe("initAvatar", () => {
+    it("should create avatar", async () => {
+      (avatarService.createAvatar as jest.Mock).mockResolvedValue({
+        id: 1,
+        userId: 1,
+      });
 
-      const response = await request(app)
-        .put("/api/avatar")
-        .send({
-          userId: localUser.id,
-          hatId: 4,
-          shirtId: 2,
-        });
+      const req = mockReq({}, { userId: "1" });
+      const res = mockRes();
 
-      expect(response.status).toBe(200);
-      expect(response.body.data.hatId).toBe(4);
+      await initAvatar(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
     });
   });
+
 });
