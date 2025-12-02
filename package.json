@@ -2,24 +2,27 @@
   "name": "habitherobackend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
+  "main": "dist/server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest"
+    "test": "jest --config jest.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.17.1",
+    "argon2": "^0.44.0",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "prisma": "^6.17.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.8.1",

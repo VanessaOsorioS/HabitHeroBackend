@@ -120,6 +120,32 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AvatarScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  hatId: 'hatId',
+  shirtId: 'shirtId',
+  pantsId: 'pantsId',
+  shoesId: 'shoesId'
+};
+
+exports.Prisma.AuthTokenScalarFieldEnum = {
+  id: 'id',
+  tokenString: 'tokenString',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+};
+
 exports.Prisma.MissionScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -132,7 +158,23 @@ exports.Prisma.MissionScalarFieldEnum = {
   difficulty: 'difficulty',
   daily: 'daily',
   reminderEnabled: 'reminderEnabled',
-  creationDate: 'creationDate'
+  creationDate: 'creationDate',
+  userId: 'userId'
+};
+
+exports.Prisma.RewardScalarFieldEnum = {
+  id: 'id',
+  rewardType: 'rewardType',
+  value: 'value',
+  description: 'description',
+  missionId: 'missionId'
+};
+
+exports.Prisma.MissionStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  status: 'status',
+  date: 'date'
 };
 
 exports.Prisma.SortOrder = {
@@ -154,8 +196,28 @@ exports.MissionType = exports.$Enums.MissionType = {
   TASK: 'TASK'
 };
 
+exports.RewardType = exports.$Enums.RewardType = {
+  XP: 'XP',
+  COIN: 'COIN',
+  BADGE: 'BADGE',
+  COLLECTABLE: 'COLLECTABLE',
+  TITLE: 'TITLE'
+};
+
+exports.MissionState = exports.$Enums.MissionState = {
+  COMPLETED: 'COMPLETED',
+  PENDING: 'PENDING',
+  FAILED: 'FAILED',
+  IN_PROGRESS: 'IN_PROGRESS'
+};
+
 exports.Prisma.ModelName = {
-  Mission: 'Mission'
+  User: 'User',
+  Avatar: 'Avatar',
+  AuthToken: 'AuthToken',
+  Mission: 'Mission',
+  Reward: 'Reward',
+  MissionStatusHistory: 'MissionStatusHistory'
 };
 
 /**

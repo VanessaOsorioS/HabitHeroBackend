@@ -4,25 +4,54 @@ import { prisma } from '../../src/config/prisma';
 jest.mock('../../src/config/prisma', () => ({
   prisma: {
     mission: {
-        findMany: jest.fn(),
-        create: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
     },
   },
 }));
 
-describe('Mission Service - getMissions' , () => {
-    it('should return all missions', async () => {
-        const mockMissions = [
-            { id: 1, name: 'Mission 1' },
-            { id: 2, name: 'Mission 2' },
-        ];
-        (prisma.mission.findMany as jest.Mock).mockResolvedValue(mockMissions);
+describe('Mission Service', () => {
+  describe('getAllMissions', () => {
+    it('should return all missions for a user', async () => {
+      const mockUserId = 1; 
+      const mockMissions = [
+        { id: 1, title: 'Mission 1', userId: mockUserId },
+        { id: 2, title: 'Mission 2', userId: mockUserId },
+      ];
+      
+      (prisma.mission.findMany as jest.Mock).mockResolvedValue(mockMissions);
 
-        const missions = await missionService.getAllMissions();
+      const missions = await missionService.getAllMissions(mockUserId);
 
-        expect(prisma.mission.findMany).toHaveBeenCalledTimes(1);
-        expect(Array.isArray(missions)).toBe(true);
-        expect(missions).toHaveLength(2);
-        expect(missions).toEqual(mockMissions);
+      expect(prisma.mission.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { userId: mockUserId }
+      }));
+      expect(missions).toEqual(mockMissions);
     });
+  });
+
+  describe('createMission', () => {
+    it('should create a new mission', async () => {
+      const mockMissionData = { name: 'New Mission', description: 'Test mission' };
+      const mockCreatedMission = { id: 1, ...mockMissionData };
+
+      (prisma.mission.create as jest.Mock).mockResolvedValue(mockCreatedMission);
+
+      const createdMission = await missionService.createMission(mockMissionData);
+
+      expect(prisma.mission.create).toHaveBeenCalledTimes(1);
+      expect(prisma.mission.create).toHaveBeenCalledWith({ data: mockMissionData });
+
+      expect(createdMission).toEqual(mockCreatedMission);
+    });
+
+    it('should throw an error if Prisma create fails', async () => {
+      const mockMissionData = { name: 'Fail Mission' };
+      (prisma.mission.create as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      await expect(missionService.createMission(mockMissionData))
+        .rejects
+        .toThrow('Database error');
+    });
+  });
 });
