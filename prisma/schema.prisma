@@ -13,3 +13,96 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  missions     Mission[]
+  avatar       Avatar?
+  tokens       AuthToken[]
+}
+
+model Avatar {
+  id        Int    @id @default(autoincrement())
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int    @unique
+
+  hatId     Int?
+  shirtId   Int?
+  pantsId   Int?
+  shoesId   Int?
+}
+
+model AuthToken {
+  id          Int      @id @default(autoincrement())
+  tokenString String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([tokenString])
+}
+
+model Mission {
+  id              Int                     @id @default(autoincrement())
+  title           String
+  description     String?
+  type            MissionType
+  dueDate         DateTime?
+  durationMinutes Int?
+  category        String?
+  priority        Int
+  difficulty      Int
+  daily           Boolean
+  reminderEnabled Boolean                 @default(false)
+  creationDate    DateTime                @default(now())
+
+  userId          Int
+  user            User                    @relation(fields: [userId], references: [id])
+  statusHistories MissionStatusHistory[]
+  rewards         Reward[]
+}
+
+model Reward {
+  id           Int         @id @default(autoincrement())
+  rewardType   RewardType
+  value        Int
+  description  String?
+
+  missionId    Int
+  mission      Mission     @relation(fields: [missionId], references: [id])
+}
+
+model MissionStatusHistory {
+  id        Int          @id @default(autoincrement())
+  mission   Mission      @relation(fields: [missionId], references: [id])
+  missionId Int
+  status    MissionState
+  date      DateTime
+}
+
+enum RewardType {
+  XP
+  COIN
+  BADGE
+  COLLECTABLE
+  TITLE
+}
+
+enum MissionState {
+  COMPLETED
+  PENDING
+  FAILED
+  IN_PROGRESS
+}
+
+enum MissionType {
+  STUDY
+  TASK
+}
